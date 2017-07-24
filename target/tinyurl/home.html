@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<script src="jquery-3.2.1.min.js" ></script>
+    <script src="./tether-1.3.3/dist/js/tether.min.js" ></script>
+    <script src="./js/bootstrap.min.js" ></script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="./css/bootstrap.min.css" >
+	<script type="text/javascript">
+		function clearMessage(){
+			$('#shortUrlSpan').text("");
+			$('#originalUrlSpan').text("");
+			$('#blacklistUrlSpan').text("");
+		}
+		function shortUrl() {
+			clearMessage();
+			var posturl = 'http://localhost:8080/tinyurl/logicmonitor/url/encode';
+			var request = $.ajax({
+				url: posturl,
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify( { "urlname": $('#originalUrl').val()} )
+			});
+			request.done(function(data) {
+				 $('#shortUrlSpan').text("Tiny Url : " + data);
+			});
+			request.fail(function(data ) {
+			  $('#shortUrlSpan').text(data.responseText);
+			});
+		}
+		
+		function originalUrl() {
+			clearMessage();
+			var geturl = 'http://localhost:8080/tinyurl/logicmonitor/url/decode?shorturl='+$('#shortUrl').val();
+			var request = $.ajax({
+				url: geturl,
+				type: 'GET'
+			});
+			request.done(function(data) {
+				$("#originalUrlSpan").text("Original Url : "+ data);
+			});
+			request.fail(function( data ) {
+			console.log(data);
+			  $('#originalUrlSpan').text(data.responseText);
+			});
+		}
+		
+		function blackListUrl() {
+			clearMessage();
+			var isBlackListed = false;
+			if($("#isBlackListed").is(':checked'))
+				isBlackListed = true;
+			var blacklistURL = 'http://localhost:8080/tinyurl/logicmonitor/url/blacklist';
+			var request = $.ajax({
+				url: blacklistURL,
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify( { "url": $('#blacklistUrl').val(), "status":isBlackListed} )
+			});
+			request.done(function(data) {
+			if(isBlackListed){
+				$('#blacklistUrlSpan').text( data);
+			}else{
+				$('#blacklistUrlSpan').text( data);
+			}
+			});
+			request.fail(function( data ) {
+			   $('#blacklistUrlSpan').text(data.responseText);
+			});
+		}
+</script>
+  
+  </head>
+  <body>
+  <div class="jumbotron text-center"><h1>TinyUrl - URL Shortener!</h1></div>
+  
+<div class="row" style="margin-left:35%">
+    <div style="width:600px">
+		<span class="label label-success font-weight-bold">Enter a long URL </span><br>
+		<input type="text" id="originalUrl" placeholder="Enter Original URL"> <button type="submit" class="btn btn-primary" onclick="shortUrl()">Make Tiny URL</button><br><br>
+		<span id="shortUrlSpan" class="label label-success font-weight-bold"></span><br><br>
+		<span class="label label-success font-weight-bold">Enter a tiny URL </span><br>
+		<input type="text" id="shortUrl" placeholder="Enter tiny URL"> <button type="submit" class="btn btn-primary" onclick="originalUrl()">Original URL</button><br><br>
+        <span id="originalUrlSpan" class="label label-success font-weight-bold"></span><br><br>
+		<span class="label label-success font-weight-bold">Enter a tiny URL to blacklist or allow</span><br>
+		<label class="form-check-label" style="margin-right:5%"><input type="checkbox" id="isBlackListed" class="form-check-input">BlackList</label>
+		<input type="text" id="blacklistUrl" placeholder="Enter tiny URL">
+		<button type="submit" class="btn btn-primary" onclick="blackListUrl()">Submit</button><br>
+		<span id="blacklistUrlSpan" class="label label-success font-weight-bold"></span>
+	</div>
+</div>
+
+   
+  </body>
+</html>
